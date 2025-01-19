@@ -1,6 +1,6 @@
 import { Anton, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { Weight } from "lucide-react";
+import Header from "@/components/Header";
 
 const geistAnton = Anton({
   variable: "--font-anton",
@@ -21,9 +21,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistAnton.variable} ${geistPlayfairDisplay.variable} antialiased`}
-      >
+      <body className={`${geistAnton.variable} ${geistPlayfairDisplay.variable} antialiased`}>
+        <Header />
         {children}
       </body>
     </html>
