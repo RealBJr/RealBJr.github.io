@@ -2,12 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+/* body {
   font-family: Arial, Helvetica, sans-serif;
-}
+} */
 
 @layer base {
   :root {
     --radius: 0.5rem;
+    --font-anton: "Anton", sans-serif; /* Fallback for older browsers */
+    --font-playfairDisplay: "Playfair Display", serif;
+  }
+
+  body {
+    @apply font-primary bg-primary text-white leading-loose;
   }
 }

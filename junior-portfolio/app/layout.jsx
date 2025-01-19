@@ -1,13 +1,15 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Anton, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { Weight } from "lucide-react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const geistAnton = Anton({
+  variable: "--font-anton",
   subsets: ["latin"],
+  weight: ['400']
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const geistPlayfairDisplay = Playfair_Display({
+  variable: "--font-playfairDisplay",
   subsets: ["latin"],
 });
 
@@ -20,7 +22,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistAnton.variable} ${geistPlayfairDisplay.variable} antialiased`}
       >
         {children}
       </body>
