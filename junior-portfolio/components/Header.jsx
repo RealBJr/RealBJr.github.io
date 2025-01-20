@@ -1,12 +1,14 @@
 "use client";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Nav from "./Nav";
+import MobileNav from "./MobileNav";
+import { useActiveSection } from "./ActiveSectionContext";
 
 export default function Header() {
-    const [activeSection, setActiveSection] = useState("");
+    const { activeSection, setActiveSection } = useActiveSection();
     const logoRef = useRef(null);
     const navRef = useRef(null);
 
@@ -14,33 +16,23 @@ export default function Header() {
         const handleIntersection = (entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
-                    setActiveSection(entry.target.id);
-                } else {
-                    setActiveSection("");
+                    setActiveSection(entry.target.id); // Update active section
                 }
             });
         };
 
-        const observer = new IntersectionObserver(handleIntersection, {
+        const observerOptions = {
             root: null,
-            threshold: 0.5,
-        });
+            threshold: window.innerWidth <= 768 ? 0.3 : 0.5, // Dynamic threshold
+        };
 
-        const section = document.querySelector("#about");
-        if (section) observer.observe(section);
+        const observer = new IntersectionObserver(handleIntersection, observerOptions);
+
+        const sections = document.querySelectorAll("#about");
+        sections.forEach((section) => observer.observe(section));
 
         return () => observer.disconnect();
-    }, []);
-
-    // Trigger header animation whenever activeSection changes
-    useEffect(() => {
-        setHeaderAnimation(true); // Start disappearing animation when activeSection changes
-        const timer = setTimeout(() => {
-            setHeaderAnimation(false); // Reappear after the animation duration
-        }, 300); // Matches the animation duration (0.3s)
-
-        return () => clearTimeout(timer);
-    }, [activeSection]);
+    }, [setActiveSection]);
 
     return (
         <header className="py-8 xl:py-12 text-white sticky top-0 bg-primary">
@@ -48,16 +40,15 @@ export default function Header() {
                 className="container mx-auto flex items-center"
                 initial={{ justifyContent: "space-between" }}
                 animate={{
-                    justifyContent: activeSection ? "center" : "space-between",
+                    justifyContent: activeSection === 'about' ? "center" : "space-between",
                     transition: {
                         duration: 0.3,
                         ease: "easeInOut",
                     },
                 }}
             >
-                <AnimatePresence>
-                    {/* Logo with Intersection Observer */}
-                    {!activeSection && (
+                <AnimatePresence mode="popLayout">
+                    {activeSection !== 'about' && (
                         <motion.div
                             ref={logoRef}
                             key="logo"
@@ -79,14 +70,12 @@ export default function Header() {
                     )}
                 </AnimatePresence>
 
-                {/* Desktop Nav (Ensure full transition of the nav) */}
                 <motion.div
                     ref={navRef}
-                    initial={{ x: 100 }}  // Start off-screen
+                    initial={{ x: 100 }}
                     animate={{
-                        x: activeSection ? 0 : 100, // Slide back to original position when activeSection is set
+                        x: activeSection === 'about' ? 0 : 100,
                     }}
-                    exit={{ x: 100 }}  // Ensure nav slides off-screen when not active
                     transition={{
                         x: { duration: 0.3 },
                     }}
@@ -94,15 +83,14 @@ export default function Header() {
                 >
                     <Nav />
                     <Link href="#contact">
-                        <Button className="hover:bg-accent hover:text-primary">
+                        <Button className="hover:bg-accent-hover hover:text-primary">
                             Download My Resume!
                         </Button>
                     </Link>
                 </motion.div>
 
-                {/* Mobile Nav */}
-                <div className="xl:hidden absolute right-4 top-8">
-                    mobile nav
+                <div className="xl:hidden">
+                    <MobileNav />
                 </div>
             </motion.div>
         </header>
