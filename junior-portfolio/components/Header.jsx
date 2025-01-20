@@ -32,6 +32,16 @@ export default function Header() {
         return () => observer.disconnect();
     }, []);
 
+    // Trigger header animation whenever activeSection changes
+    useEffect(() => {
+        setHeaderAnimation(true); // Start disappearing animation when activeSection changes
+        const timer = setTimeout(() => {
+            setHeaderAnimation(false); // Reappear after the animation duration
+        }, 300); // Matches the animation duration (0.3s)
+
+        return () => clearTimeout(timer);
+    }, [activeSection]);
+
     return (
         <header className="py-8 xl:py-12 text-white sticky top-0 bg-primary">
             <motion.div
