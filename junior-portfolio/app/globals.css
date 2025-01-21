@@ -16,4 +16,8 @@
   body {
     @apply font-primary bg-primary text-white leading-loose;
   }
+  
+  html {
+    scroll-behavior: smooth;
+  }
 }

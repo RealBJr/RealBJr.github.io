@@ -29,7 +29,16 @@ export default {
 					hover: '#FFC300'
 				},
 				background: 'var(--background)',
-				foreground: 'var(--foreground)'
+				foreground: 'var(--foreground)',
+				animation: {
+					wave: 'wave 6s ease-in-out infinite',
+				},
+				keyframes: {
+					wave: {
+						'0%, 100%': { transform: 'translateX(0) scale(1)' },
+						'50%': { transform: 'translateX(-10px) scale(1.1)' },
+					},
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -1,6 +1,5 @@
 import { Anton, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
 import { ActiveSectionProvider } from "@/components/ActiveSectionContext";
 
 const geistAnton = Anton({
@@ -24,7 +23,6 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistAnton.variable} ${geistPlayfairDisplay.variable} antialiased`}>
         <ActiveSectionProvider>
-          <Header />
           {children}
         </ActiveSectionProvider>
       </body>
