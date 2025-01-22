@@ -50,8 +50,7 @@ export default function MobileNav() {
         <Sheet>
             <SheetTrigger>
                 <div>
-                    <CiMenuFries className="text-[32px] text-accent block sm:hidden" />
-                    <FiMenu className="text-[32px] text-accent hidden sm:block" />
+                    <FiMenu className="text-[32px] text-accent" />
                 </div>
             </SheetTrigger>
             <SheetContent className="flex flex-col">

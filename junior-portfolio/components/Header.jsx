@@ -35,7 +35,7 @@ export default function Header() {
     }, [setActiveSection]);
 
     return (
-        <header className="py-8 xl:py-12 text-white sticky top-0 bg-primary">
+        <header className="py-8 xl:py-12 text-white sticky top-0 bg-primary z-20">
             <motion.div
                 className="container mx-auto flex items-center"
                 initial={{ justifyContent: "space-between" }}
