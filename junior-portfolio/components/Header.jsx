@@ -1,39 +1,11 @@
 "use client";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Nav from "./Nav";
 import MobileNav from "./MobileNav";
-import { useActiveSection } from "./ActiveSectionContext";
 
-export default function Header() {
-    const { activeSection, setActiveSection } = useActiveSection();
-    const logoRef = useRef(null);
-    const navRef = useRef(null);
-
-    useEffect(() => {
-        const handleIntersection = (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    setActiveSection(entry.target.id); // Update active section
-                }
-            });
-        };
-
-        const observerOptions = {
-            root: null,
-            threshold: window.innerWidth <= 768 ? 0.3 : 0.5, // Dynamic threshold
-        };
-
-        const observer = new IntersectionObserver(handleIntersection, observerOptions);
-
-        const sections = document.querySelectorAll("#about");
-        sections.forEach((section) => observer.observe(section));
-
-        return () => observer.disconnect();
-    }, [setActiveSection]);
-
+export default function Header({ activeSection }) {
     return (
         <header className="py-8 xl:py-12 text-white sticky top-0 bg-primary z-20">
             <motion.div
@@ -50,7 +22,6 @@ export default function Header() {
                 <AnimatePresence mode="popLayout">
                     {activeSection !== 'about' && (
                         <motion.div
-                            ref={logoRef}
                             key="logo"
                             initial={{ opacity: 0, x: -150 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -71,7 +42,6 @@ export default function Header() {
                 </AnimatePresence>
 
                 <motion.div
-                    ref={navRef}
                     initial={{ x: 100 }}
                     animate={{
                         x: activeSection === 'about' ? 0 : 100,
@@ -90,7 +60,7 @@ export default function Header() {
                 </motion.div>
 
                 <div className="xl:hidden">
-                    <MobileNav />
+                    <MobileNav activeSection={activeSection} />
                 </div>
             </motion.div>
         </header>

@@ -5,15 +5,15 @@ import SlidingBlocksAnimation from './SlidingBlocksAnimation';
 
 let descriptions = [
     {
-        description: 'A Software Engineering Student @ Concordia University',
-        param: 'text-2xl',
-    },
-    {
-        description: 'an aspiring ML developer',
+        description: 'A Software Engineering Student',
         param: 'text-5xl',
     },
     {
-        description: 'A life time learner',
+        description: 'A Full-Stack Developer',
+        param: 'text-5xl',
+    },
+    {
+        description: 'A Backend Developer',
         param: 'text-5xl',
     },
 ];
@@ -112,7 +112,6 @@ export default function About() {
             <SlidingBlocksAnimation />
             {/* Text Section */}
             <div className="text-center">
-                {/* "Hi, I am" */}
                 <span
                     className={`block text-white font-bold ${hiSize}`}
                     style={{
@@ -122,9 +121,8 @@ export default function About() {
                     Hi, I am
                 </span>
 
-                {/* "Junior Boni" */}
                 <span
-                    className={`block ${nameSize} text-accent-hover font-bold`}
+                    className={`block ${nameSize} font-bold`}
                     style={{
                         textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', // Custom text shadow
                     }}
@@ -146,7 +144,7 @@ export default function About() {
                         className="mt-4 h-4"
                     >
                         <span
-                            className={`${descriptions[currentIndex].param} text-white font-bold`}
+                            className={`${descriptions[currentIndex].param} font-bold text-accent-hover`}
                             style={{
                                 textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', // Custom text shadow
                             }}

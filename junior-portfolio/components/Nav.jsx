@@ -1,35 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
 import links from "./Links";
 import { useActiveSection } from "./ActiveSectionContext";
 
 export default function Nav() {
     const { activeSection, setActiveSection } = useActiveSection();
-
-    useEffect(() => {
-        const handleIntersection = (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    setActiveSection(entry.target.id); // Set the active section based on the ID
-                }
-            });
-        };
-
-        const observer = new IntersectionObserver(handleIntersection, {
-            root: null,
-            threshold: 0.5,
-        });
-
-        links.forEach((link) => {
-            const section = document.querySelector(link.href);
-            if (section) observer.observe(section);
-        });
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [setActiveSection]);
 
     return (
         <nav className="flex gap-8">
