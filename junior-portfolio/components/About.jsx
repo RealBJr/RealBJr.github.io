@@ -39,29 +39,29 @@ export default function About() {
             const width = window.innerWidth;
 
             let newNameSize;
-            if (width < 575) {
-                newNameSize = 'text-4xl';
+            if (width >= 1080) {
+                newNameSize = initialNameSize;
                 descriptions = descriptions.map((item) => ({
                     ...item,
-                    param: 'text-base',
+                    param: item.param === 'text-5xl' ? 'text-5xl' : 'text-2xl',
                 }));
-            } else if (width < 820) {
-                newNameSize = 'text-5xl';
-                descriptions = descriptions.map((item) => ({
-                    ...item,
-                    param: item.param === 'text-2xl' ? 'text-lg' : 'text-base',
-                }));
-            } else if (width < 1080) {
+            } else if (width >= 820) {
                 newNameSize = 'text-7xl';
                 descriptions = descriptions.map((item) => ({
                     ...item,
                     param: item.param === 'text-5xl' ? 'text-2xl' : 'text-xl',
                 }));
-            } else {
-                newNameSize = initialNameSize;
+            } else if (width >= 575) {
+                newNameSize = 'text-5xl';
                 descriptions = descriptions.map((item) => ({
                     ...item,
-                    param: item.param === 'text-5xl' ? 'text-5xl' : 'text-2xl',
+                    param: item.param === 'text-2xl' ? 'text-lg' : 'text-base',
+                }));
+            } else {
+                newNameSize = 'text-4xl';
+                descriptions = descriptions.map((item) => ({
+                    ...item,
+                    param: 'text-base',
                 }));
             }
 
@@ -104,7 +104,7 @@ export default function About() {
     return (
         <div
             id="about"
-            className="w-1/2 flex items-center justify-center relative z-10"
+            className="w-1/2 flex items-center justify-center relative z-10 transition-all"
             style={{
                 height: aboutHeight,
             }}

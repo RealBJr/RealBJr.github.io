@@ -12,6 +12,8 @@ export default function App() {
   useEffect(() => {
     const handleIntersection = (entries) => {
       entries.forEach((entry) => {
+        // entry.target.classList.toggle('opacity-1', entry.isIntersecting);
+        // entry.target.classList.toggle('opacity-0', !entry.isIntersecting);
         if (entry.isIntersecting) {
           console.log("Intersecting:", entry.target.id);
           setActiveSection(entry.target.id); // Update active section
@@ -47,7 +49,7 @@ export default function App() {
       <div
         className="absolute inset-0 h-screen w-full bg-right bg-cover bg-no-repeat -z-10"
         style={{
-          backgroundImage: "url('/assets/photo.jpg')",
+          backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 1)), url('/assets/photo.jpg')",
           backgroundPosition: "50% 0%",
         }}
       >

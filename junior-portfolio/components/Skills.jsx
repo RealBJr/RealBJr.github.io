@@ -1,29 +1,225 @@
+import React, { useEffect, useRef } from "react";
+import * as d3 from "d3";
+import { gsap } from "gsap"
+
+
 export default function Skills() {
+    const chartRef = useRef(null);
+    const datasets = [
+        [
+            { axis: "Programming Languages", value: 0.93 },
+            { axis: "Front-End Development", value: 0.85 },
+            { axis: "Back-End Development", value: 0.8 },
+            { axis: "Soft Skills", value: 0.93 },
+            { axis: "Tools & Technologies", value: 0.85 },
+        ],
+        [
+            { axis: "HTML", value: 0.9 },
+            { axis: "CSS", value: 0.8 },
+            { axis: "Tailwind CSS", value: 0.8 },
+            { axis: "React.js", value: 0.85 },
+            { axis: "Next.js", value: 0.8 },
+        ],
+        [
+            { axis: "Node.js", value: 0.85 },
+            { axis: "SQL", value: 0.8 },
+            { axis: "MSSQL", value: 0.85 },
+            { axis: "MySQL", value: 0.75 },
+            { axis: "Next.js", value: 0.87 },
+            { axis: "Java Spring Boot", value: 0.75 },
+        ],
+        [
+            { axis: "English Communication", value: 0.9 },
+            { axis: "French Communication", value: 0.92 },
+            { axis: "Teamwork", value: 0.95 },
+            { axis: "Adaptability", value: 0.94 },
+            { axis: "Problem-Solving", value: 0.9 },
+        ],
+        [
+            { axis: "Git", value: 0.9 },
+            { axis: "Azure", value: 0.88 },
+            { axis: "Azure DevOps", value: 0.85 },
+            { axis: "VSCode", value: 0.95 },
+            { axis: "Eclipse", value: 0.9 },
+            { axis: "Netbeans", value: 0.8 },
+        ],
+        [
+            { axis: "Java", value: 0.94 },
+            { axis: "JavaScript", value: 0.92 },
+            { axis: "Python", value: 0.85 },
+            { axis: "C", value: 0.85 },
+            { axis: "AL", value: 0.88 },
+        ],
+    ];
+
+
+    const viewBoxWidth = 600;
+    const viewBoxHeight = 600;
+    // const levels = 5; // Number of grid levels
+    const graphMaxValue = 1;
+
+    const startAnimation = () => {
+        const svg = d3
+            .select(chartRef.current)
+            .append("svg")
+            .attr("width", viewBoxWidth)
+            .attr("height", viewBoxHeight)
+            .append("g")
+            .attr("transform", `translate(${viewBoxWidth / 2}, ${viewBoxHeight / 2})`);
+
+        const radius = Math.min(viewBoxWidth, viewBoxHeight) / 2 - 50;
+        const radiusScale = d3.scaleLinear().domain([0, graphMaxValue]).range([0, radius]);
+        const angleSlice = (Math.PI * 2) / datasets[0].length;
+
+        let isPaused = false; // Animation pause flag
+
+        // Draw initial points
+        const drawPoints = (data) => {
+            svg.selectAll("circle.point")
+                .data(data)
+                .join("circle")
+                .attr("class", "point")
+                .attr("r", 5)
+                .attr("fill", "blue")
+                .attr("cx", (d, i) => radiusScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2))
+                .attr("cy", (d, i) => radiusScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2));
+        };
+
+        // Move a single point to origin and update the path
+        const moveSinglePointToOrigin = (data, index) => {
+            return new Promise((resolve) => {
+                // Update the `value` for the current point to `0` temporarily
+                const updatedData = data.map((d, i) =>
+                    i === index ? { ...d, value: 0 } : d
+                );
+
+                // Animate the current point to the origin
+                svg.selectAll("circle.point")
+                    .filter((_, i) => i === index)
+                    .transition()
+                    .duration(500)
+                    .attr("cx", 0)
+                    .attr("cy", 0)
+                    .on("end", resolve); // Resolve after the animation completes
+
+                // Update the path dynamically to reflect the concave shape
+                svg.select("path.radar")
+                    .datum(updatedData)
+                    .transition()
+                    .duration(500)
+                    .attr("d", d3.lineRadial()
+                        .radius((d) => radiusScale(d.value))
+                        .angle((_, i) => i * angleSlice)
+                        .curve(d3.curveLinearClosed)
+                    );
+            });
+        };
+
+        // Move all points to the origin sequentially
+        const movePointsToOrigin = (data) => {
+            return data.reduce(
+                (promise, _, i) => promise.then(() => moveSinglePointToOrigin(data, i)),
+                Promise.resolve()
+            );
+        };
+
+        // Move points outward and fill the path
+        const movePointsOutward = (data) => {
+            const pointsPromise = new Promise((resolve) => {
+                svg.selectAll("circle.point")
+                    .data(data)
+                    .transition()
+                    .duration(500)
+                    .delay((_, i) => i * 200) // Staggered delay
+                    .attr("cx", (d, i) => radiusScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2))
+                    .attr("cy", (d, i) => radiusScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2))
+                    .on("end", (_, i) => {
+                        if (i === data.length - 1) resolve(); // Resolve after the last point finishes
+                    });
+            });
+
+            const pathPromise = new Promise((resolve) => {
+                svg.select("path.radar")
+                    .datum(data)
+                    .transition()
+                    .duration(1000) // Ensure the path animation matches the points
+                    .attr("d", d3.lineRadial()
+                        .radius((d) => radiusScale(d.value))
+                        .angle((_, i) => i * angleSlice)
+                        .curve(d3.curveLinearClosed)
+                    )
+                    .on("end", resolve); // Resolve after the path finishes
+            });
+
+            return Promise.all([pointsPromise, pathPromise]);
+        };
+
+        // Draw and animate the radar chart for all datasets
+        const animateRadarChart = async () => {
+            for (let i = 0; i < datasets.length; i++) {
+                if (isPaused) return; // Pause animation if the flag is set
+
+                const currentData = datasets[i];
+
+                // Draw points for the first dataset
+                if (i === 0) drawPoints(currentData);
+
+                // Remove old path
+                svg.selectAll("path.radar").remove();
+
+                // Draw a new path starting from the origin
+                svg.append("path")
+                    .datum(currentData)
+                    .attr("class", "radar")
+                    .attr("d", d3.lineRadial()
+                        .radius((d) => 0) // Start from origin
+                        .angle((_, i) => i * angleSlice)
+                        .curve(d3.curveLinearClosed)
+                    )
+                    .attr("fill", "rgba(0, 128, 255, 0.3)")
+                    .attr("stroke", "blue")
+                    .attr("stroke-width", 2);
+
+                // Move points to the origin sequentially while updating the path
+                await movePointsToOrigin(currentData);
+
+                // Move points outward and animate the path simultaneously
+                await movePointsOutward(currentData);
+            }
+
+            // Restart animation
+            animateRadarChart();
+        };
+
+        // Pause and resume animation on hover
+        svg.on("mouseover", () => {
+            isPaused = true; // Pause animation
+        });
+        svg.on("mouseout", () => {
+            if (isPaused) {
+                isPaused = false; // Resume animation
+                animateRadarChart();
+            }
+        });
+
+        // Start the animation
+        animateRadarChart();
+    };
+
+
+
+    useEffect(() => {
+        startAnimation();
+        return () => d3.select(chartRef.current).selectAll("*").remove();
+    }, []);
+
     return (
-        <div id="skills">
-            <h1>
-                Skills
-            </h1>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Dicta in molestiae sint eligendi eum perspiciatis eos corporis placeat, nobis excepturi hic atque, rem qui deserunt ratione! Beatae sapiente dolor placeat!
-            Delectus, maxime. Cumque numquam rerum delectus repellat fugit nostrum fugiat officiis ullam illum quam. Iusto dolores asperiores corrupti enim voluptatem autem cumque fugit, delectus recusandae labore inventore ipsum accusamus dignissimos.
-            Labore iusto et, consequatur voluptatibus sit laborum illum assumenda architecto laboriosam accusamus est a sed quibusdam ex modi nam nihil natus unde ea sint omnis maxime voluptates cumque ipsum. Quam.
-            Porro vel blanditiis placeat totam pariatur eveniet aspernatur minus ducimus doloremque cumque nostrum facilis nobis culpa beatae dolorem est voluptates voluptatem nesciunt, voluptate adipisci repellat, cupiditate dolore ea ullam. Exercitationem.
-            Atque, accusantium eaque perspiciatis deserunt earum suscipit qui ab. Amet sit fuga voluptatibus, inventore eos cum modi nostrum laborum quam quos illo illum minima ullam expedita numquam quibusdam ratione dignissimos.
-            Error atque ducimus nihil labore. Eos pariatur consequuntur tempora nisi repellat et nostrum inventore, suscipit alias ut. Voluptates voluptatibus ab temporibus maiores labore, possimus, veritatis culpa consectetur corrupti itaque inventore!
-            Architecto quaerat recusandae tempore? Omnis laudantium id iure itaque recusandae cumque sint voluptas animi accusamus ullam corrupti doloribus quae officia, commodi laborum ut voluptate placeat dicta qui quos dolorum accusantium!
-            Voluptates in quis reprehenderit repudiandae dignissimos reiciendis nihil odio explicabo eaque ullam. Quo cupiditate minus consectetur iusto fuga quaerat neque ut, ab nam laboriosam magnam labore harum quam dicta perspiciatis.
-            Non sed, distinctio tenetur odio labore repudiandae voluptas quam recusandae similique esse excepturi voluptatibus, et ipsa dolore ab architecto minus voluptates aut possimus facilis quia? Quas facere beatae nihil expedita?
-            Aliquid doloremque hic sunt eius enim, cumque porro dignissimos aspernatur voluptas pariatur itaque est aliquam nisi nobis aut minus sit. Voluptas deserunt a voluptatum. Voluptate voluptatem pariatur sint mollitia error.
-            Molestias ipsa, nemo saepe aliquid distinctio ipsam ut similique dignissimos reiciendis autem tenetur esse quae ratione nam exercitationem vel natus voluptas ex molestiae dolorem praesentium voluptatem reprehenderit voluptate quo. Vero.
-            Ipsum deleniti doloremque odit dolor repellendus eligendi minus iste. Laboriosam, officia temporibus architecto nesciunt saepe vero minima neque enim iure rem corporis recusandae? Ad officia rerum laudantium provident! Aspernatur, quisquam?
-            Quis quidem quas recusandae cumque! Porro expedita perspiciatis ex soluta. Delectus pariatur, placeat, quos totam doloribus necessitatibus repudiandae natus asperiores deserunt aliquam odit est enim suscipit unde ipsum nobis ipsa!
-            Nobis neque magni praesentium provident repudiandae eligendi veniam at, blanditiis numquam. Dolore repudiandae ratione inventore iste rerum natus, dicta iusto delectus voluptas nisi quas vitae qui ducimus asperiores, maiores dolorum.
-            Error maxime ipsa ipsam veniam mollitia! At nobis dolores quod asperiores repudiandae odio nesciunt, nam quis quas fugit iusto impedit iure et dicta eligendi iste! Ad numquam impedit debitis qui!
-            Autem eos, maxime distinctio repellat impedit debitis iste esse dolore quisquam odio facere aperiam quas fugiat reiciendis ea quia praesentium, perspiciatis unde cum itaque? Deserunt dicta molestiae maxime minus eaque?
-            Est, consequatur blanditiis tempore cumque mollitia quae corporis sapiente animi cupiditate expedita laboriosam tenetur id, eos amet odio! Dolores, deserunt! Corporis sequi deleniti fugit voluptates necessitatibus adipisci neque fuga nulla?
-            Cupiditate est fugit excepturi expedita earum tempora, cum numquam praesentium quidem dolorem sunt, illo nesciunt nisi aperiam. Dolorem exercitationem cumque saepe eos quam libero eaque alias quibusdam itaque. Eligendi, sint?
-            Iure nesciunt quidem est aperiam culpa similique aliquam voluptatum excepturi! Amet deserunt distinctio nulla quasi asperiores dolorem vero architecto saepe, harum mollitia possimus nesciunt accusamus dignissimos at, atque alias quisquam.
-            Dolor maxime ipsa voluptatibus quaerat quia quae, ipsum nostrum nam accusantium repellat libero ad eligendi modi id quod provident autem ea minus consequatur soluta. Tenetur cupiditate odio magnam saepe exercitationem.
-        </div>
+        <div id="skills" className="transition-all">
+            <h1 className="flex text-5xl justify-center m-12">Skills</h1>
+            <div className="flex flex-row justify-center items-center">
+                <div ref={chartRef} className="flex justify-center items-center w-1/2"></div>
+                <div id="Skills Dashboard" className="w-1/2 h-1"></div>
+            </div>
+        </div >
     );
 }
